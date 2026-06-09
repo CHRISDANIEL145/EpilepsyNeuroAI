@@ -4,7 +4,4 @@ services:
     env: python
     buildCommand: "python -m pip install -r web_app/requirements.txt"
     startCommand: "cd web_app && gunicorn app:app"
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.2"
     plan: free
