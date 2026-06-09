@@ -34,9 +34,10 @@ app = Flask(__name__)
 app.secret_key = 'epilepsy_prediction_secret_key_2024'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
-UPLOAD_FOLDER = 'uploads'
+BASE_DIR = Path(__file__).resolve().parent
+UPLOAD_FOLDER = str(BASE_DIR / 'uploads')
 ALLOWED_EXTENSIONS = {'csv', 'xls', 'xlsx', 'txt'}
-MODEL_PATH = '../model_file/epilepsy_quantum_model.h5'
+MODEL_PATH = str(BASE_DIR / '../model_file/epilepsy_quantum_model.h5')
 SIGNAL_LENGTH = 1000
 NUM_CHANNELS = 23
 CLASSES = ["NORMAL", "ICTAL", "PREICTAL", "POSTICTAL"]
@@ -767,6 +768,7 @@ if __name__ == '__main__':
     load_model()
     print(f"📊 Config: {SIGNAL_LENGTH} samples × {NUM_CHANNELS} channels")
     print(f"📊 Classes: {', '.join(CLASSES)}")
-    print("🚀 Server: http://localhost:5000")
+    port = int(os.environ.get('PORT', 5000))
+    print(f"🚀 Server: http://localhost:{port}")
     print("=" * 60 + "\n")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=port)
