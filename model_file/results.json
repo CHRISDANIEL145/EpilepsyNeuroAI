@@ -1,0 +1,14 @@
+{
+  "test_accuracy": 0.9340659340659341,
+  "training_samples": 1589,
+  "val_samples": 228,
+  "test_samples": 455,
+  "signal_length": 1000,
+  "num_channels": 23,
+  "classes": [
+    "NORMAL",
+    "ICTAL",
+    "PREICTAL",
+    "POSTICTAL"
+  ]
+}

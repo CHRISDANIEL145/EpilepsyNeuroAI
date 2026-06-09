@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NeuroGuard AI{% endblock %} | Clinical Epilepsy Prediction</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Material Tailwind -->
+    <link rel="stylesheet" href="https://unpkg.com/@material-tailwind/html@latest/styles/material-tailwind.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-aqua': '#0afff2',
+                        'neon-purple': '#a855f7',
+                        'neon-indigo': '#4f46e5',
+                        'dark-zinc': '#18181b',
+                        'dark-slate': '#0f172a',
+                        'med-blue': '#3b82f6',
+                        'med-yellow': '#eab308',
+                        'med-red': '#ef4444',
+                        'med-green': '#22c55e',
+                    },
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'scan': 'scan 2s linear infinite',
+                        'gradient': 'gradient 8s ease infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 25%, #0f172a 50%, #1e1b4b 75%, #0f172a 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Particle Effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #0afff2;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            50% { transform: translateY(-100px) translateX(50px); opacity: 0.8; }
+        }
+        
+        /* Neon Glow Effects */
+        .neon-glow {
+            box-shadow: 0 0 5px #0afff2, 0 0 10px #0afff2, 0 0 20px #0afff2, 0 0 40px #0afff2;
+        }
+        
+        .neon-glow-purple {
+            box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 40px #a855f7;
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 5px #0afff2, 0 0 10px #0afff2, 0 0 20px #0afff2;
+        }
+        
+        .neon-text-purple {
+            text-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7, 0 0 20px #a855f7;
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(10, 255, 242, 0.2);
+        }
+        
+        .glass-card {
+            background: rgba(30, 27, 75, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(10, 255, 242, 0.15);
+            border-radius: 16px;
+        }
+        
+        /* Scan Line Effect */
+        .scan-line {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scan-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0afff2, transparent);
+            animation: scan 2s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px #0afff2, 0 0 10px #0afff2; }
+            50% { box-shadow: 0 0 20px #0afff2, 0 0 40px #0afff2, 0 0 60px #0afff2; }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #0afff2, #a855f7);
+            border-radius: 4px;
+        }
+        
+        /* Navigation */
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: #0afff2;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #0afff2;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        /* Button Styles */
+        .btn-neon {
+            background: linear-gradient(135deg, #0afff2 0%, #4f46e5 100%);
+            color: #0f172a;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-neon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(10, 255, 242, 0.5), 0 0 40px rgba(10, 255, 242, 0.3);
+        }
+        
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-neon:hover::before {
+            left: 100%;
+        }
+        
+        /* Status Indicators */
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .status-online {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+        
+        .status-warning {
+            background: #eab308;
+            box-shadow: 0 0 10px #eab308;
+        }
+        
+        .status-danger {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+        
+        /* Wave Animation */
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230afff2' fill-opacity='0.1' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") repeat-x;
+            animation: wave 10s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(10, 255, 242, 0.2);
+            border-top-color: #0afff2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: rgba(10, 255, 242, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0afff2, #a855f7);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Card Hover Effect */
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(10, 255, 242, 0.15);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-mobile {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(20px);
+                padding: 1rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .nav-mobile.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Wave Effect -->
+    <div class="wave-container">
+        <div class="wave"></div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="glass fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-aqua to-neon-purple flex items-center justify-center">
+                    <svg class="w-6 h-6 text-dark-slate" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <span class="font-orbitron text-xl font-bold text-neon-aqua neon-text">NeuroGuard AI</span>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-6">
+                <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Dashboard</a>
+                <a href="/upload" class="nav-link {% if request.endpoint == 'upload_page' %}active{% endif %}">Upload</a>
+                <a href="/results" class="nav-link {% if request.endpoint == 'results_page' %}active{% endif %}">Results</a>
+                <a href="/history" class="nav-link {% if request.endpoint == 'history_page' %}active{% endif %}">History</a>
+                <a href="/visualization" class="nav-link {% if request.endpoint == 'visualization_page' %}active{% endif %}">Visualization</a>
+            </div>
+            
+            <!-- Status Indicator -->
+            <div class="hidden md:flex items-center gap-3">
+                <div class="status-dot status-online" id="systemStatus"></div>
+                <span class="text-sm text-slate-400">System Online</span>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-neon-aqua" id="mobileMenuBtn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="nav-mobile md:hidden" id="mobileNav">
+            <a href="/" class="nav-link block py-3">Dashboard</a>
+            <a href="/upload" class="nav-link block py-3">Upload</a>
+            <a href="/results" class="nav-link block py-3">Results</a>
+            <a href="/history" class="nav-link block py-3">History</a>
+            <a href="/visualization" class="nav-link block py-3">Visualization</a>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="glass py-6 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-slate-400 text-sm">© 2024 NeuroGuard AI - Clinical-Grade Epilepsy Prediction System</p>
+            <div class="flex items-center gap-4">
+                <span class="text-xs text-slate-500">Powered by 1D-CNN + LSTM Deep Learning</span>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Base Scripts -->
+    <script>
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            document.getElementById('mobileNav').classList.toggle('active');
+        });
+        
+        // Check system status
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/system-status');
+                const data = await response.json();
+                const statusDot = document.getElementById('systemStatus');
+                if (data.success && data.status.model_loaded) {
+                    statusDot.className = 'status-dot status-online';
+                } else {
+                    statusDot.className = 'status-dot status-warning';
+                }
+            } catch (error) {
+                document.getElementById('systemStatus').className = 'status-dot status-danger';
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            checkSystemStatus();
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

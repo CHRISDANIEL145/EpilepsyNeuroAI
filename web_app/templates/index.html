@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-[80vh] flex items-center justify-center">
+    <!-- Animated Grid Background -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <div class="text-center z-10 px-4">
+        <!-- Main Title -->
+        <div class="mb-8">
+            <h1 class="font-orbitron text-5xl md:text-7xl font-black mb-4 animate-title">
+                <span class="bg-gradient-to-r from-neon-aqua via-neon-purple to-neon-indigo bg-clip-text text-transparent">
+                    NeuroGuard AI
+                </span>
+            </h1>
+            <div class="h-1 w-48 mx-auto bg-gradient-to-r from-transparent via-neon-aqua to-transparent mb-6"></div>
+            <p class="text-xl md:text-2xl text-slate-300 font-light tracking-wide">
+                Clinical-Grade Epilepsy Prediction System
+            </p>
+            <p class="text-lg text-neon-aqua mt-2 font-orbitron">
+                Real-Time Seizure Detection
+            </p>
+        </div>
+        
+        <!-- Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12 max-w-5xl mx-auto">
+            <div class="glass-card p-6 hover-lift">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-med-blue/20 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-med-blue" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-med-blue mb-2">NORMAL</h3>
+                <p class="text-xs text-slate-400">Healthy brain activity</p>
+            </div>
+            
+            <div class="glass-card p-6 hover-lift">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-med-yellow/20 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-med-yellow" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-med-yellow mb-2">PREICTAL</h3>
+                <p class="text-xs text-slate-400">Pre-seizure warning</p>
+            </div>
+            
+            <div class="glass-card p-6 hover-lift">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-med-red/20 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-med-red" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-med-red mb-2">ICTAL</h3>
+                <p class="text-xs text-slate-400">Active seizure</p>
+            </div>
+            
+            <div class="glass-card p-6 hover-lift">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-med-green/20 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-med-green" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-med-green mb-2">POSTICTAL</h3>
+                <p class="text-xs text-slate-400">Recovery phase</p>
+            </div>
+        </div>
+        
+        <!-- CTA Button -->
+        <a href="/upload" class="btn-neon inline-flex items-center gap-3 text-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            Upload EEG File
+        </a>
+        
+        <!-- System Stats -->
+        <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div class="text-center">
+                <div class="font-orbitron text-3xl font-bold text-neon-aqua mb-1" id="statAccuracy">95%+</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Accuracy</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron text-3xl font-bold text-neon-purple mb-1">4</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Classes</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron text-3xl font-bold text-neon-aqua mb-1">23</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wider">EEG Channels</div>
+            </div>
+            <div class="text-center">
+                <div class="font-orbitron text-3xl font-bold text-neon-purple mb-1" id="statPredictions">0</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Predictions</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Section -->
+<section class="py-16">
+    <div class="glass-card p-8 md:p-12">
+        <h2 class="font-orbitron text-2xl md:text-3xl font-bold text-center mb-8">
+            <span class="bg-gradient-to-r from-neon-aqua to-neon-purple bg-clip-text text-transparent">
+                Advanced Deep Learning Architecture
+            </span>
+        </h2>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-neon-aqua/20 to-neon-indigo/20 flex items-center justify-center border border-neon-aqua/30">
+                    <span class="font-orbitron text-2xl font-bold text-neon-aqua">1D</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">1D-CNN Layers</h3>
+                <p class="text-sm text-slate-400">Convolutional neural networks extract spatial features from EEG signals with high precision.</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-neon-purple/20 to-neon-indigo/20 flex items-center justify-center border border-neon-purple/30">
+                    <span class="font-orbitron text-2xl font-bold text-neon-purple">LSTM</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Bi-LSTM Layers</h3>
+                <p class="text-sm text-slate-400">Bidirectional LSTM captures temporal dependencies in brain wave patterns.</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-neon-indigo/20 to-neon-aqua/20 flex items-center justify-center border border-neon-indigo/30">
+                    <span class="font-orbitron text-2xl font-bold text-neon-indigo">AI</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Hybrid Model</h3>
+                <p class="text-sm text-slate-400">Combined architecture achieves clinical-grade accuracy for seizure prediction.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="py-8">
+    <div class="grid md:grid-cols-2 gap-6">
+        <a href="/upload" class="glass-card p-6 hover-lift group cursor-pointer block">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-neon-aqua to-neon-indigo flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7 text-dark-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg group-hover:text-neon-aqua transition-colors">New Analysis</h3>
+                    <p class="text-sm text-slate-400">Upload EEG file for prediction</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="/history" class="glass-card p-6 hover-lift group cursor-pointer block">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-neon-purple to-neon-indigo flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7 text-dark-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg group-hover:text-neon-purple transition-colors">View History</h3>
+                    <p class="text-sm text-slate-400">Browse previous predictions</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grid-pattern {
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(10, 255, 242, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(10, 255, 242, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+    }
+    
+    .animate-title {
+        animation: titleGlow 3s ease-in-out infinite;
+    }
+    
+    @keyframes titleGlow {
+        0%, 100% { filter: drop-shadow(0 0 20px rgba(10, 255, 242, 0.5)); }
+        50% { filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.8)); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate stats on load
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/system-status');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('statPredictions').textContent = data.status.predictions_made;
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+        
+        // Animate numbers
+        anime({
+            targets: '.font-orbitron.text-3xl',
+            scale: [0.5, 1],
+            opacity: [0, 1],
+            duration: 1000,
+            delay: anime.stagger(100),
+            easing: 'easeOutElastic(1, .5)'
+        });
+    });
+</script>
+{% endblock %}

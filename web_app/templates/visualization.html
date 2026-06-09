@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+
+{% block title %}EEG Visualization{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+        <h1 class="font-orbitron text-3xl md:text-4xl font-bold mb-4">
+            <span class="bg-gradient-to-r from-neon-aqua to-neon-purple bg-clip-text text-transparent">
+                EEG Signal Visualization
+            </span>
+        </h1>
+        <p class="text-slate-400">Real-time neural signal monitoring and analysis</p>
+    </div>
+    
+    <!-- Main Visualization Card -->
+    <div class="glass-card p-6 md:p-8 mb-8">
+        <!-- Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <button id="playBtn" class="px-4 py-2 rounded-lg bg-neon-aqua/20 border border-neon-aqua/30 text-neon-aqua hover:bg-neon-aqua/30 transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" id="playIcon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <span id="playText">Play</span>
+                </button>
+                <button id="resetBtn" class="px-4 py-2 rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-700/50 transition-colors">
+                    Reset
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <label class="text-sm text-slate-400">Speed:</label>
+                <input type="range" id="speedSlider" min="1" max="10" value="5" class="w-24 accent-neon-aqua">
+                <span class="text-sm text-neon-aqua" id="speedValue">5x</span>
+            </div>
+        </div>
+        
+        <!-- EEG Chart -->
+        <div class="relative bg-slate-900/50 rounded-xl p-4 mb-6 overflow-hidden">
+            <!-- Scan Line Effect -->
+            <div class="absolute inset-0 pointer-events-none scan-line opacity-30"></div>
+            
+            <!-- Grid Background -->
+            <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(rgba(10, 255, 242, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(10, 255, 242, 0.3) 1px, transparent 1px); background-size: 20px 20px;"></div>
+            
+            <canvas id="eegChart" height="300"></canvas>
+        </div>
+        
+        <!-- Channel Selector -->
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-slate-400 mb-3">Active Channels</h3>
+            <div class="flex flex-wrap gap-2" id="channelSelector">
+                <!-- Channel buttons will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Signal Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">Amplitude</div>
+                <div class="font-orbitron text-xl text-neon-aqua" id="statAmplitude">0.00 μV</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">Frequency</div>
+                <div class="font-orbitron text-xl text-neon-purple" id="statFrequency">0.00 Hz</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">Sample Rate</div>
+                <div class="font-orbitron text-xl text-neon-indigo" id="statSampleRate">256 Hz</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">Duration</div>
+                <div class="font-orbitron text-xl text-med-green" id="statDuration">0.00 s</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brain Wave Types -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card p-4 hover-lift">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <span class="font-orbitron font-bold text-blue-400">δ</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-blue-400">Delta</h4>
+                    <p class="text-xs text-slate-500">0.5-4 Hz</p>
+                </div>
+            </div>
+            <div class="h-12 relative overflow-hidden rounded-lg bg-slate-800/50">
+                <canvas id="deltaWave" class="w-full h-full"></canvas>
+            </div>
+        </div>
+        
+        <div class="glass-card p-4 hover-lift">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <span class="font-orbitron font-bold text-purple-400">θ</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-purple-400">Theta</h4>
+                    <p class="text-xs text-slate-500">4-8 Hz</p>
+                </div>
+            </div>
+            <div class="h-12 relative overflow-hidden rounded-lg bg-slate-800/50">
+                <canvas id="thetaWave" class="w-full h-full"></canvas>
+            </div>
+        </div>
+        
+        <div class="glass-card p-4 hover-lift">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <span class="font-orbitron font-bold text-green-400">α</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-green-400">Alpha</h4>
+                    <p class="text-xs text-slate-500">8-13 Hz</p>
+                </div>
+            </div>
+            <div class="h-12 relative overflow-hidden rounded-lg bg-slate-800/50">
+                <canvas id="alphaWave" class="w-full h-full"></canvas>
+            </div>
+        </div>
+        
+        <div class="glass-card p-4 hover-lift">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                    <span class="font-orbitron font-bold text-yellow-400">β</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-yellow-400">Beta</h4>
+                    <p class="text-xs text-slate-500">13-30 Hz</p>
+                </div>
+            </div>
+            <div class="h-12 relative overflow-hidden rounded-lg bg-slate-800/50">
+                <canvas id="betaWave" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brain Map -->
+    <div class="glass-card p-6 md:p-8">
+        <h3 class="font-semibold text-lg mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-aqua" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+            10-20 Electrode System
+        </h3>
+        
+        <div class="flex justify-center">
+            <div class="relative w-80 h-80">
+                <!-- Brain outline -->
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <!-- Head outline -->
+                    <ellipse cx="100" cy="100" rx="90" ry="95" fill="none" stroke="rgba(10, 255, 242, 0.3)" stroke-width="2"/>
+                    <!-- Nose indicator -->
+                    <path d="M100 5 L95 15 L105 15 Z" fill="rgba(10, 255, 242, 0.3)"/>
+                    
+                    <!-- Electrode positions -->
+                    <!-- Frontal -->
+                    <circle cx="100" cy="30" r="8" class="electrode" id="elec-Fz" fill="rgba(10, 255, 242, 0.3)" stroke="#0afff2"/>
+                    <circle cx="60" cy="45" r="8" class="electrode" id="elec-F3" fill="rgba(10, 255, 242, 0.3)" stroke="#0afff2"/>
+                    <circle cx="140" cy="45" r="8" class="electrode" id="elec-F4" fill="rgba(10, 255, 242, 0.3)" stroke="#0afff2"/>
+                    <circle cx="30" cy="55" r="8" class="electrode" id="elec-F7" fill="rgba(10, 255, 242, 0.3)" stroke="#0afff2"/>
+                    <circle cx="170" cy="55" r="8" class="electrode" id="elec-F8" fill="rgba(10, 255, 242, 0.3)" stroke="#0afff2"/>
+                    
+                    <!-- Central -->
+                    <circle cx="100" cy="100" r="8" class="electrode" id="elec-Cz" fill="rgba(168, 85, 247, 0.3)" stroke="#a855f7"/>
+                    <circle cx="55" cy="100" r="8" class="electrode" id="elec-C3" fill="rgba(168, 85, 247, 0.3)" stroke="#a855f7"/>
+                    <circle cx="145" cy="100" r="8" class="electrode" id="elec-C4" fill="rgba(168, 85, 247, 0.3)" stroke="#a855f7"/>
+                    
+                    <!-- Temporal -->
+                    <circle cx="15" cy="100" r="8" class="electrode" id="elec-T3" fill="rgba(234, 179, 8, 0.3)" stroke="#eab308"/>
+                    <circle cx="185" cy="100" r="8" class="electrode" id="elec-T4" fill="rgba(234, 179, 8, 0.3)" stroke="#eab308"/>
+                    <circle cx="25" cy="145" r="8" class="electrode" id="elec-T5" fill="rgba(234, 179, 8, 0.3)" stroke="#eab308"/>
+                    <circle cx="175" cy="145" r="8" class="electrode" id="elec-T6" fill="rgba(234, 179, 8, 0.3)" stroke="#eab308"/>
+                    
+                    <!-- Parietal -->
+                    <circle cx="100" cy="145" r="8" class="electrode" id="elec-Pz" fill="rgba(34, 197, 94, 0.3)" stroke="#22c55e"/>
+                    <circle cx="60" cy="145" r="8" class="electrode" id="elec-P3" fill="rgba(34, 197, 94, 0.3)" stroke="#22c55e"/>
+                    <circle cx="140" cy="145" r="8" class="electrode" id="elec-P4" fill="rgba(34, 197, 94, 0.3)" stroke="#22c55e"/>
+                    
+                    <!-- Occipital -->
+                    <circle cx="100" cy="180" r="8" class="electrode" id="elec-Oz" fill="rgba(239, 68, 68, 0.3)" stroke="#ef4444"/>
+                    <circle cx="70" cy="175" r="8" class="electrode" id="elec-O1" fill="rgba(239, 68, 68, 0.3)" stroke="#ef4444"/>
+                    <circle cx="130" cy="175" r="8" class="electrode" id="elec-O2" fill="rgba(239, 68, 68, 0.3)" stroke="#ef4444"/>
+                </svg>
+                
+                <!-- Labels -->
+                <div class="absolute top-[10%] left-1/2 -translate-x-1/2 text-xs text-neon-aqua">Fz</div>
+                <div class="absolute top-[18%] left-[25%] text-xs text-neon-aqua">F3</div>
+                <div class="absolute top-[18%] right-[25%] text-xs text-neon-aqua">F4</div>
+                <div class="absolute top-[23%] left-[10%] text-xs text-neon-aqua">F7</div>
+                <div class="absolute top-[23%] right-[10%] text-xs text-neon-aqua">F8</div>
+                
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-neon-purple">Cz</div>
+                <div class="absolute top-1/2 left-[23%] -translate-y-1/2 text-xs text-neon-purple">C3</div>
+                <div class="absolute top-1/2 right-[23%] -translate-y-1/2 text-xs text-neon-purple">C4</div>
+                
+                <div class="absolute top-1/2 left-[2%] -translate-y-1/2 text-xs text-med-yellow">T3</div>
+                <div class="absolute top-1/2 right-[2%] -translate-y-1/2 text-xs text-med-yellow">T4</div>
+                
+                <div class="absolute bottom-[22%] left-1/2 -translate-x-1/2 text-xs text-med-green">Pz</div>
+                <div class="absolute bottom-[5%] left-1/2 -translate-x-1/2 text-xs text-med-red">Oz</div>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="flex flex-wrap justify-center gap-6 mt-6 text-sm">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-neon-aqua"></div>
+                <span class="text-slate-400">Frontal</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-neon-purple"></div>
+                <span class="text-slate-400">Central</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-med-yellow"></div>
+                <span class="text-slate-400">Temporal</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-med-green"></div>
+                <span class="text-slate-400">Parietal</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-med-red"></div>
+                <span class="text-slate-400">Occipital</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .electrode {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .electrode:hover {
+        filter: drop-shadow(0 0 10px currentColor);
+        transform-origin: center;
+    }
+    
+    .electrode.active {
+        animation: electrodePulse 1s ease-in-out infinite;
+    }
+    
+    @keyframes electrodePulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; filter: drop-shadow(0 0 15px currentColor); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // EEG Channel names
+    const channels = ['Fp1', 'Fp2', 'F7', 'F3', 'Fz', 'F4', 'F8', 'T3', 'C3', 'Cz', 'C4', 'T4', 'T5', 'P3', 'Pz', 'P4', 'T6', 'O1', 'Oz', 'O2'];
+    const channelColors = [
+        '#0afff2', '#0afff2', '#0afff2', '#0afff2', '#0afff2', '#0afff2', '#0afff2',
+        '#eab308', '#a855f7', '#a855f7', '#a855f7', '#eab308',
+        '#eab308', '#22c55e', '#22c55e', '#22c55e', '#eab308',
+        '#ef4444', '#ef4444', '#ef4444'
+    ];
+    
+    let eegChart = null;
+    let isPlaying = false;
+    let animationFrame = null;
+    let dataOffset = 0;
+    let speed = 5;
+    let activeChannels = [0, 1, 2, 3, 4];
+    
+    // Generate simulated EEG data
+    function generateEEGData(numPoints = 500) {
+        const data = [];
+        for (let i = 0; i < numPoints; i++) {
+            // Combine multiple frequencies to simulate EEG
+            const delta = Math.sin(i * 0.02) * 30; // Delta: 0.5-4 Hz
+            const theta = Math.sin(i * 0.05) * 20; // Theta: 4-8 Hz
+            const alpha = Math.sin(i * 0.1) * 15;  // Alpha: 8-13 Hz
+            const beta = Math.sin(i * 0.2) * 10;   // Beta: 13-30 Hz
+            const noise = (Math.random() - 0.5) * 10;
+            
+            data.push(delta + theta + alpha + beta + noise);
+        }
+        return data;
+    }
+    
+    // Initialize channel selector
+    function initChannelSelector() {
+        const selector = document.getElementById('channelSelector');
+        selector.innerHTML = channels.map((ch, i) => `
+            <button class="channel-btn px-3 py-1 rounded-full text-xs font-medium transition-all ${activeChannels.includes(i) ? 'active' : ''}" 
+                    data-channel="${i}"
+                    style="background: ${activeChannels.includes(i) ? channelColors[i] + '40' : 'transparent'}; 
+                           border: 1px solid ${channelColors[i]}40; 
+                           color: ${activeChannels.includes(i) ? channelColors[i] : '#64748b'}">
+                ${ch}
+            </button>
+        `).join('');
+        
+        selector.querySelectorAll('.channel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const ch = parseInt(btn.dataset.channel);
+                if (activeChannels.includes(ch)) {
+                    activeChannels = activeChannels.filter(c => c !== ch);
+                } else if (activeChannels.length < 8) {
+                    activeChannels.push(ch);
+                }
+                initChannelSelector();
+                updateChart();
+            });
+        });
+    }
+    
+    // Initialize main EEG chart
+    function initEEGChart() {
+        const ctx = document.getElementById('eegChart').getContext('2d');
+        
+        const datasets = activeChannels.map((chIdx, i) => ({
+            label: channels[chIdx],
+            data: generateEEGData(),
+            borderColor: channelColors[chIdx],
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            tension: 0.4
+        }));
+        
+        eegChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 500 }, (_, i) => i),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#94a3b8',
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#64748b' },
+                        min: -100,
+                        max: 100
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+    
+    // Update chart with new data
+    function updateChart() {
+        if (!eegChart) return;
+        
+        eegChart.data.datasets = activeChannels.map((chIdx) => ({
+            label: channels[chIdx],
+            data: generateEEGData(),
+            borderColor: channelColors[chIdx],
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            tension: 0.4
+        }));
+        
+        eegChart.update('none');
+    }
+    
+    // Animate chart
+    function animateChart() {
+        if (!isPlaying) return;
+        
+        dataOffset += speed;
+        
+        eegChart.data.datasets.forEach((dataset, i) => {
+            const newData = generateEEGData();
+            dataset.data = newData.map((v, j) => {
+                const phase = (j + dataOffset) * 0.1;
+                return v * Math.sin(phase) + Math.cos(phase * 0.5) * 20;
+            });
+        });
+        
+        eegChart.update('none');
+        
+        // Update stats
+        const amplitude = (Math.random() * 50 + 20).toFixed(2);
+        const frequency = (Math.random() * 20 + 5).toFixed(2);
+        const duration = (dataOffset / 256).toFixed(2);
+        
+        document.getElementById('statAmplitude').textContent = amplitude + ' μV';
+        document.getElementById('statFrequency').textContent = frequency + ' Hz';
+        document.getElementById('statDuration').textContent = duration + ' s';
+        
+        // Animate electrodes
+        document.querySelectorAll('.electrode').forEach(el => {
+            if (Math.random() > 0.7) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+        
+        animationFrame = requestAnimationFrame(animateChart);
+    }
+    
+    // Initialize mini wave charts
+    function initMiniWaves() {
+        const waves = [
+            { id: 'deltaWave', freq: 0.02, color: '#3b82f6' },
+            { id: 'thetaWave', freq: 0.05, color: '#a855f7' },
+            { id: 'alphaWave', freq: 0.1, color: '#22c55e' },
+            { id: 'betaWave', freq: 0.2, color: '#eab308' }
+        ];
+        
+        waves.forEach(wave => {
+            const canvas = document.getElementById(wave.id);
+            const ctx = canvas.getContext('2d');
+            
+            function drawWave() {
+                const width = canvas.width = canvas.offsetWidth * 2;
+                const height = canvas.height = canvas.offsetHeight * 2;
+                
+                ctx.clearRect(0, 0, width, height);
+                ctx.strokeStyle = wave.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                const offset = Date.now() * 0.002;
+                for (let x = 0; x < width; x++) {
+                    const y = height / 2 + Math.sin((x + offset) * wave.freq * 10) * (height / 3);
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.stroke();
+                requestAnimationFrame(drawWave);
+            }
+            
+            drawWave();
+        });
+    }
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        initChannelSelector();
+        initEEGChart();
+        initMiniWaves();
+        
+        document.getElementById('playBtn').addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            document.getElementById('playIcon').innerHTML = isPlaying 
+                ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+                : '<path d="M8 5v14l11-7z"/>';
+            document.getElementById('playText').textContent = isPlaying ? 'Pause' : 'Play';
+            
+            if (isPlaying) {
+                animateChart();
+            } else {
+                cancelAnimationFrame(animationFrame);
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isPlaying = false;
+            dataOffset = 0;
+            document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+            document.getElementById('playText').textContent = 'Play';
+            cancelAnimationFrame(animationFrame);
+            updateChart();
+            
+            document.getElementById('statAmplitude').textContent = '0.00 μV';
+            document.getElementById('statFrequency').textContent = '0.00 Hz';
+            document.getElementById('statDuration').textContent = '0.00 s';
+        });
+        
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = speed + 'x';
+        });
+    });
+</script>
+{% endblock %}

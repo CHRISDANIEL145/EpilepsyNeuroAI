@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Upload EEG{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="text-center mb-12">
+        <h1 class="font-orbitron text-3xl md:text-4xl font-bold mb-4">
+            <span class="bg-gradient-to-r from-neon-aqua to-neon-purple bg-clip-text text-transparent">
+                EEG File Upload
+            </span>
+        </h1>
+        <p class="text-slate-400">Upload your EEG data file for AI-powered seizure prediction analysis</p>
+    </div>
+    
+    <!-- Upload Card -->
+    <div class="glass-card p-8 md:p-12 mb-8">
+        <!-- Drop Zone -->
+        <div id="dropZone" class="relative border-2 border-dashed border-neon-aqua/30 rounded-2xl p-12 text-center transition-all duration-300 hover:border-neon-aqua/60 hover:bg-neon-aqua/5 cursor-pointer">
+            <!-- Upload Icon -->
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-neon-aqua/20 to-neon-purple/20 flex items-center justify-center" id="uploadIcon">
+                <svg class="w-12 h-12 text-neon-aqua" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+            </div>
+            
+            <h3 class="text-xl font-semibold mb-2">Drag & Drop EEG File</h3>
+            <p class="text-slate-400 mb-4">or click to browse</p>
+            
+            <!-- File Input -->
+            <input type="file" id="fileInput" class="hidden" accept=".csv,.xls,.xlsx">
+            
+            <!-- Supported Formats -->
+            <div class="flex items-center justify-center gap-4 text-sm text-slate-500">
+                <span class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700">.CSV</span>
+                <span class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700">.XLS</span>
+                <span class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700">.XLSX</span>
+            </div>
+        </div>
+        
+        <!-- File Info (Hidden by default) -->
+        <div id="fileInfo" class="hidden mt-6 p-6 rounded-xl bg-slate-800/50 border border-neon-aqua/20">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg bg-neon-aqua/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-neon-aqua" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold" id="fileName">filename.csv</p>
+                        <p class="text-sm text-slate-400" id="fileSize">0 KB</p>
+                    </div>
+                </div>
+                <button id="removeFile" class="p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Progress Bar (Hidden by default) -->
+        <div id="progressContainer" class="hidden mt-6">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-slate-400">Uploading...</span>
+                <span class="text-sm text-neon-aqua" id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <!-- Upload Button -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="uploadBtn" class="btn-neon flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                Upload & Analyze
+            </button>
+        </div>
+    </div>
+    
+    <!-- Instructions Card -->
+    <div class="glass-card p-6">
+        <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-aqua" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            File Requirements
+        </h3>
+        <div class="grid md:grid-cols-2 gap-4 text-sm text-slate-400">
+            <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-neon-aqua/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-neon-aqua text-xs">1</span>
+                </div>
+                <p>EEG data should be in CSV, XLS, or XLSX format with numerical values</p>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-neon-aqua/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-neon-aqua text-xs">2</span>
+                </div>
+                <p>Each row represents a time sample, columns represent EEG channels</p>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-neon-aqua/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-neon-aqua text-xs">3</span>
+                </div>
+                <p>Supports up to 23 EEG channels (standard 10-20 system)</p>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-neon-aqua/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-neon-aqua text-xs">4</span>
+                </div>
+                <p>Signal will be automatically preprocessed and normalized</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loadingModal" class="fixed inset-0 bg-dark-slate/90 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="glass-card p-12 text-center max-w-md mx-4">
+        <div class="spinner mx-auto mb-6"></div>
+        <h3 class="font-orbitron text-xl font-bold text-neon-aqua mb-2">Analyzing EEG Data</h3>
+        <p class="text-slate-400" id="loadingText">Processing neural signals...</p>
+        
+        <!-- Animated Steps -->
+        <div class="mt-6 space-y-3 text-left">
+            <div class="flex items-center gap-3 text-sm" id="step1">
+                <div class="w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                </div>
+                <span class="text-slate-500">Loading EEG data</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm" id="step2">
+                <div class="w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                </div>
+                <span class="text-slate-500">Preprocessing signals</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm" id="step3">
+                <div class="w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                </div>
+                <span class="text-slate-500">Running AI prediction</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm" id="step4">
+                <div class="w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                </div>
+                <span class="text-slate-500">Generating results</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFile = document.getElementById('removeFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const loadingModal = document.getElementById('loadingModal');
+    
+    let selectedFile = null;
+    
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    // Drag and drop events
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-neon-aqua', 'bg-neon-aqua/10');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-neon-aqua', 'bg-neon-aqua/10');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-neon-aqua', 'bg-neon-aqua/10');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+    
+    // Handle file selection
+    function handleFile(file) {
+        const validExtensions = ['csv', 'xls', 'xlsx'];
+        const extension = file.name.split('.').pop().toLowerCase();
+        
+        if (!validExtensions.includes(extension)) {
+            showNotification('Invalid file type. Please upload CSV, XLS, or XLSX files.', 'error');
+            return;
+        }
+        
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.classList.remove('hidden');
+        uploadBtn.disabled = false;
+        
+        // Animate file info
+        anime({
+            targets: '#fileInfo',
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 500,
+            easing: 'easeOutCubic'
+        });
+    }
+    
+    // Remove file
+    removeFile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.classList.add('hidden');
+        uploadBtn.disabled = true;
+    });
+    
+    // Upload button click
+    uploadBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+        
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        // Show progress
+        progressContainer.classList.remove('hidden');
+        uploadBtn.disabled = true;
+        
+        try {
+            // Simulate upload progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+            
+            // Upload file
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+            
+            const uploadData = await uploadResponse.json();
+            
+            if (!uploadData.success) {
+                throw new Error(uploadData.error);
+            }
+            
+            // Show loading modal
+            loadingModal.classList.remove('hidden');
+            animateLoadingSteps();
+            
+            // Run prediction
+            const predictResponse = await fetch('/api/predict', {
+                method: 'POST'
+            });
+            
+            const predictData = await predictResponse.json();
+            
+            if (!predictData.success) {
+                throw new Error(predictData.error);
+            }
+            
+            // Store result and redirect
+            sessionStorage.setItem('predictionResult', JSON.stringify(predictData));
+            
+            setTimeout(() => {
+                window.location.href = '/results';
+            }, 1500);
+            
+        } catch (error) {
+            loadingModal.classList.add('hidden');
+            progressContainer.classList.add('hidden');
+            uploadBtn.disabled = false;
+            showNotification(error.message || 'Upload failed. Please try again.', 'error');
+        }
+    });
+    
+    // Animate loading steps
+    function animateLoadingSteps() {
+        const steps = ['step1', 'step2', 'step3', 'step4'];
+        let currentStep = 0;
+        
+        const interval = setInterval(() => {
+            if (currentStep < steps.length) {
+                const step = document.getElementById(steps[currentStep]);
+                step.querySelector('div').classList.remove('border-slate-600');
+                step.querySelector('div').classList.add('border-neon-aqua');
+                step.querySelector('div > div').classList.remove('bg-slate-600');
+                step.querySelector('div > div').classList.add('bg-neon-aqua');
+                step.querySelector('span').classList.remove('text-slate-500');
+                step.querySelector('span').classList.add('text-neon-aqua');
+                currentStep++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 500);
+    }
+    
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-24 right-4 z-50 p-4 rounded-lg ${type === 'error' ? 'bg-red-500/20 border border-red-500 text-red-400' : 'bg-neon-aqua/20 border border-neon-aqua text-neon-aqua'} max-w-sm`;
+        notification.innerHTML = `
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    ${type === 'error' ? '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>' : '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>'}
+                </svg>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        anime({
+            targets: notification,
+            opacity: [0, 1],
+            translateX: [50, 0],
+            duration: 500,
+            easing: 'easeOutCubic'
+        });
+        
+        setTimeout(() => {
+            anime({
+                targets: notification,
+                opacity: 0,
+                translateX: 50,
+                duration: 300,
+                easing: 'easeInCubic',
+                complete: () => notification.remove()
+            });
+        }, 5000);
+    }
+</script>
+{% endblock %}
