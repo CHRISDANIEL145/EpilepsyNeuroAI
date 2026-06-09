@@ -2,9 +2,9 @@ services:
   - type: web
     name: epilepsy-neuro-ai
     env: python
-    buildCommand: "pip install -r web_app/requirements.txt"
+    buildCommand: "python -m pip install -r web_app/requirements.txt"
     startCommand: "cd web_app && gunicorn app:app"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.2
+        value: "3.11.2"
     plan: free
